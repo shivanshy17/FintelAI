@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start Your Free Trial - FintelAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-emerald-400 p-2 rounded-xl">
+          <i class="fa-solid fa-chart-line text-white text-2xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight">FintelAI</h1>
+      </div>
+      <div class="text-sm text-slate-600">
+        Step 1 of 2: Sign In
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-4">Start Your Free Trial</h2>
+        <p class="text-slate-600">Quick and easy. No credit card required.</p>
+      </div>
+
+      <!-- Step 1: Google Sign-In -->
+      <div id="step1" class="space-y-6">
+        <div class="text-center">
+          <p class="text-slate-600 mb-6">Sign up with your Google account to get started</p>
+          <button type="button" id="googleSignupBtn" class="w-full bg-white border-2 border-slate-200 text-slate-700 px-8 py-4 rounded-2xl font-semibold hover:border-emerald-400 hover:text-emerald-400 transition flex items-center justify-center gap-3">
+            <i class="fa-brands fa-google text-lg"></i>
+            Sign Up with Google
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Profile Details (shown after Google sign-in) -->
+      <form id="signupForm" class="hidden space-y-6">
+        <div class="text-center mb-6">
+          <h3 class="text-xl font-semibold">Tell us about yourself</h3>
+          <p class="text-slate-600 text-sm">Complete your profile (Step 2 of 2)</p>
+        </div>
+
+        <!-- Personal Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-600 mb-2">Full Name</label>
+            <input type="text" id="fullName" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-600 mb-2">Age</label>
+            <input type="number" id="age" required min="18" max="100" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+        </div>
+
+        <!-- Financial Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-600 mb-2">Monthly Income (₹)</label>
+            <input type="number" id="monthlyIncome" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-600 mb-2">Monthly Expenses (₹)</label>
+            <input type="number" id="monthlyExpenses" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-600 mb-2">Monthly Savings (₹)</label>
+            <input type="number" id="monthlySavings" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-600 mb-2">Marital Status</label>
+            <select id="maritalStatus" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              <option value="">Select Status</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Assets Section -->
+        <div>
+          <label class="block text-sm font-medium text-slate-600 mb-4">Assets (Optional)</label>
+          <div id="assetsContainer" class="space-y-4">
+            <div class="asset-item grid grid-cols-1 md:grid-cols-3 gap-4">
+              <select class="assetType w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                <option value="">Asset Type</option>
+                <option value="Savings Account">Savings Account</option>
+                <option value="Fixed Deposit">Fixed Deposit</option>
+                <option value="Mutual Funds">Mutual Funds</option>
+                <option value="Stocks">Stocks</option>
+                <option value="Real Estate">Real Estate</option>
+                <option value="Gold">Gold</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="number" placeholder="Value (₹)" class="assetValue w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              <button type="button" class="removeAsset bg-red-100 text-red-600 px-4 py-3 rounded-xl hover:bg-red-200">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          <button type="button" id="addAsset" class="mt-4 bg-emerald-100 text-emerald-600 px-4 py-2 rounded-xl hover:bg-emerald-200">
+            <i class="fa-solid fa-plus mr-2"></i>Add Asset
+          </button>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center pt-6">
+          <button type="submit" class="bg-emerald-400 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-emerald-500 transition">
+            Complete Profile & Start Trial
+          </button>
+          <p class="text-sm text-slate-500 mt-4"><a href="app.html" class="text-emerald-400 hover:underline">Skip for now</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    function initSignupPage() {
+      initializeFirebase();
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      auth.onAuthStateChanged(user => {
+        currentUser = user;
+      });
+
+      // Google Sign-In button
+      document.getElementById('googleSignupBtn').addEventListener('click', signUpWithGoogle);
+
+      // Add asset functionality
+      document.getElementById('addAsset').addEventListener('click', addAssetField);
+
+      // Form submission (after Google sign-in)
+      document.getElementById('signupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await handleProfileSubmit(db);
+      });
+    }
+
+    async function signUpWithGoogle() {
+      const auth = firebase.auth();
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      try {
+        const result = await auth.signInWithPopup(provider);
+        currentUser = result.user;
+
+        // Pre-fill name from Google account
+        document.getElementById('fullName').value = currentUser.displayName || '';
+        
+        // Show profile form and hide sign-in button
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('signupForm').classList.remove('hidden');
+      } catch (error) {
+        console.error('Google sign-in error:', error);
+        alert('Sign-in failed: ' + error.message);
+      }
+    }
+
+    function addAssetField() {
+      const container = document.getElementById('assetsContainer');
+      const assetItem = document.createElement('div');
+      assetItem.className = 'asset-item grid grid-cols-1 md:grid-cols-3 gap-4';
+      assetItem.innerHTML = `
+        <select class="assetType w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <option value="">Asset Type</option>
+          <option value="Savings Account">Savings Account</option>
+          <option value="Fixed Deposit">Fixed Deposit</option>
+          <option value="Mutual Funds">Mutual Funds</option>
+          <option value="Stocks">Stocks</option>
+          <option value="Real Estate">Real Estate</option>
+          <option value="Gold">Gold</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="number" placeholder="Value (₹)" class="assetValue w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <button type="button" class="removeAsset bg-red-100 text-red-600 px-4 py-3 rounded-xl hover:bg-red-200">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      `;
+      container.appendChild(assetItem);
+
+      // Add remove functionality
+      assetItem.querySelector('.removeAsset').addEventListener('click', () => {
+        assetItem.remove();
+      });
+    }
+
+    async function handleProfileSubmit(db) {
+      if (!currentUser) {
+        alert('Please sign in first');
+        return;
+      }
+
+      const formData = {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        fullName: document.getElementById('fullName').value,
+        age: parseInt(document.getElementById('age').value),
+        monthlyIncome: parseFloat(document.getElementById('monthlyIncome').value),
+        monthlyExpenses: parseFloat(document.getElementById('monthlyExpenses').value),
+        monthlySavings: parseFloat(document.getElementById('monthlySavings').value),
+        maritalStatus: document.getElementById('maritalStatus').value,
+        assets: []
+      };
+
+      // Collect assets
+      document.querySelectorAll('.asset-item').forEach(item => {
+        const type = item.querySelector('.assetType').value;
+        const value = parseFloat(item.querySelector('.assetValue').value);
+        if (type && value) {
+          formData.assets.push({ type, value });
+        }
+      });
+
+      try {
+        // Save profile to Firestore
+        await db.collection('users').doc(currentUser.uid).set({
+          ...formData,
+          riskAppetite: 50,
+          dependents: formData.maritalStatus === "Married" ? 1 : 0,
+          goals: [{ id: "1", type: "Emergency", targetAmount: 300000, durationYears: 1, currentSavings: 0 }],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        console.log('✅ User profile created in Firestore:', currentUser.uid);
+        
+        // Small delay to ensure data is synced before redirect
+        setTimeout(() => {
+          window.location.href = 'app.html';
+        }, 500);
+      } catch (error) {
+        console.error('Profile save error:', error);
+        alert('Error saving profile: ' + error.message);
+      }
+    }
+
+    // Initialize on load
+    window.onload = initSignupPage;
+  </script>
+</body>
+</html>

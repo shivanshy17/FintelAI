@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FintelAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="newpage.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    #chatbotButton { transition: transform 0.2s ease; }
+    #chatbotButton:hover { transform: translateY(-3px); }
+    .chatbot-bubble { display: inline-block; max-width: 100%; padding: 12px 14px; border-radius: 20px; line-height: 1.4; }
+    .chatbot-user { background: #dcfdf3; color: #164e2b; align-self: flex-end; }
+    .chatbot-bot { background: #f8fafc; color: #0f172a; align-self: flex-start; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+
+  <!-- Header -->
+  <header class="header border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-emerald-400 p-2 rounded-xl">
+          <i class="fa-solid fa-chart-line text-white text-2xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight">FintelAI</h1>
+      </div>
+    <!-- Auth Section -->
+      <div class="flex items-center gap-4">
+        <div id="authSection" class="flex items-center gap-3">
+          <button id="signInButton" class="rounded-2xl bg-emerald-400 text-white px-4 py-2 text-sm font-semibold hover:bg-emerald-500">Sign in with Google</button>
+          <button id="signOutButton" class="hidden rounded-2xl bg-slate-100 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-200">Sign Out</button>
+          <span id="userStatus" class="hidden text-[13px] text-emerald-100"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="max-w-7xl mx-auto px-6 pt-6 mb-2">
+    <div class="flex gap-3 border-b border-slate-200 pb-4 overflow-x-auto scollbar-hide">
+      <button id="btn1" onclick="switchTab(1)" class="profile tab-button active px-8 py-3 rounded-2xl font-semibold text-sm flex-1 md:flex-none bg-emerald-400 text-white whitespace-nowrap">
+        Profile
+      </button>
+      <button id="btn2" onclick="switchTab(2)" class="recommendation tab-button px-8 py-3 rounded-2xl font-semibold text-sm flex-1 md:flex-none bg-white hover:bg-slate-100 whitespace-nowrap shadow-sm text-slate-600">
+        Recommendations
+      </button>
+      <button id="btn3" onclick="switchTab(3)" class="market tab-button px-8 py-3 rounded-2xl font-semibold text-sm flex-1 md:flex-none bg-white hover:bg-slate-100 whitespace-nowrap shadow-sm text-slate-600">
+        Market Data
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Areas -->
+  <div class="max-w-7xl mx-auto px-6 py-4">
+
+    <!-- ==================== TAB 1 ==================== -->
+    <div id="tab1" class="tab-content">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+        <!-- Left: Profile -->
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center gap-3 mb-6">
+              <i class="fa-solid fa-users text-emerald-400 text-xl"></i>
+              <h2 class="font-semibold text-xl">Your Profile</h2>
+            </div>
+            <div class="space-y-5">
+              <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">Monthly Income (₹)</label>
+                <input id="monthlyIncome" type="number" value="50000" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-600 mb-1">Age</label>
+                  <input id="age" type="number" value="25" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-600 mb-1">Marital Status</label>
+                  <select id="maritalStatus" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none">
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                  </select>
+                </div>
+              </div>
+              <div id="dependentsContainer" class="hidden">
+                <label class="block text-sm font-medium text-slate-600 mb-1">Dependents</label>
+                <input id="dependents" type="number" value="0" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none">
+              </div>
+              <div>
+                <div class="flex justify-between mb-2">
+                  <label class="text-sm font-medium text-slate-600">Risk Appetite</label>
+                  <span id="riskValue" class="font-bold text-emerald-400">50%</span>
+                </div>
+                <input id="riskAppetite" type="range" min="0" max="100" value="50" class="w-full accent-emerald-400">
+                <div class="flex justify-between text-xs text-slate-400 mt-1">
+                  <span>Conservative</span>
+                  <span>Aggressive</span>
+                </div>
+              </div>
+              <button id="riskGuideButton" class="mt-4 bg-emerald-400 text-white px-4 py-2 rounded-2xl text-sm font-semibold hover:bg-emerald-500">Take Risk Assessment Quiz</button>
+            </div>
+          </div>
+
+          <!-- Smart Insights -->
+          <div class="bg-emerald-800 text-white rounded-3xl p-6 relative overflow-hidden shadow-lg">
+            <div class="flex items-center gap-3 mb-4">
+              <i class="fa-solid fa-lightbulb text-emerald-300"></i>
+              <h2 class="font-semibold text-xl">Smart Insights</h2>
+            </div>
+            <ul id="insightsList" class="space-y-3 text-emerald-50 text-sm"></ul>
+          </div>
+        </div>
+
+        <!-- Right: Income Split + Investment -->
+        <div class="lg:col-span-8 space-y-8">
+          <!-- Income Split -->
+          <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-wallet text-emerald-400 text-xl"></i>
+                <h2 class="font-semibold text-xl">Income Split (Smart Budgeting)</h2>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="h-72">
+                <canvas id="incomePieChart"></canvas>
+              </div>
+              <div id="incomeBreakdown" class="space-y-4"></div>
+            </div>
+          </div>
+
+
+          <!-- Return Calculator -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <i class="fa-solid fa-trending-up text-emerald-400 text-xl"></i>
+            <h2 class="font-semibold text-xl">Return Calculator</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div>
+              <label class="block text-xs font-bold text-slate-400 mb-2">Monthly SIP (₹)</label>
+              <input id="calcMonthly" type="number" value="5000" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-400 mb-2">Expected Return (%)</label>
+              <input id="calcRate" type="number" value="12" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-400 mb-2">Years</label>
+              <input id="calcYears" type="number" value="10" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl">
+            </div>
+          </div>
+          <div class="h-80 mb-8">
+            <canvas id="growthLineChart"></canvas>
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="bg-slate-50 p-5 rounded-2xl">
+              <p class="text-xs font-bold text-slate-400">Total Invested</p>
+              <p id="totalInvested" class="text-2xl font-bold text-slate-800">₹6,00,000</p>
+            </div>
+            <div class="bg-slate-50 p-5 rounded-2xl">
+              <p class="text-xs font-bold text-slate-400">Est. Returns</p>
+              <p id="estReturns" class="text-2xl font-bold text-emerald-400">₹4,85,000</p>
+            </div>
+            <div class="bg-emerald-400 text-white p-5 rounded-2xl">
+              <p class="text-xs font-bold text-emerald-50">Final Value</p>
+              <p id="finalValue" class="text-2xl font-bold">₹10,85,000</p>
+            </div>
+          </div>
+        </div>
+
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 2 ==================== -->
+    <div id="tab2" class="tab-content hidden">
+      <div class="space-y-8">
+
+        <!-- Investment Recommendation -->
+          <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center gap-3 mb-6">
+              <i class="fa-solid fa-shield-halved text-emerald-400 text-xl"></i>
+              <h2 class="font-semibold text-xl">Investment Recommendation</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="h-56">
+                <canvas id="investmentPieChart"></canvas>
+              </div>
+              <div class="md:col-span-2 space-y-6">
+                <div id="allocationCards" class="grid grid-cols-3 gap-4"></div>
+                <div class="p-5 bg-emerald-100 rounded-2xl border border-emerald-200">
+                  <p class="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">Suggested Instruments</p>
+                  <div id="instruments" class="flex flex-wrap gap-2"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <!-- Goal Planning -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+          <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-bullseye text-emerald-400 text-xl"></i>
+              <h2 class="font-semibold text-xl">Goal Planning</h2>
+            </div>
+            <button onclick="addGoal()" 
+              class="flex items-center gap-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-600 px-5 py-2.5 rounded-2xl text-sm font-semibold transition">
+              <i class="fa-solid fa-plus"></i> Add Goal
+            </button>
+          </div>
+          <div id="goalsContainer" class="space-y-6"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3 ==================== -->
+    <div id="tab3" class="tab-content hidden">
+      <div class="space-y-8">
+
+        <!-- Stock Search & Quote -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <i class="fa-solid fa-search text-emerald-400 text-xl"></i>
+            <h2 class="font-semibold text-xl">Stock Search & Quotes</h2>
+          </div>
+          <div class="space-y-4">
+            <div class="flex gap-4">
+              <input id="stockSearch" type="text" placeholder="Search for stocks (e.g., Apple, Tesla)" class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              <button onclick="searchStocks()" class="bg-emerald-400 text-white px-6 py-3 rounded-2xl hover:bg-emerald-500">Search</button>
+            </div>
+            <div id="searchResults" class="hidden space-y-2 max-h-40 overflow-y-auto"></div>
+            <div id="stockQuote" class="hidden p-4 bg-slate-50 rounded-2xl">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div><p class="text-xs text-slate-500">Symbol</p><p id="quoteSymbol" class="font-bold text-lg"></p></div>
+                <div><p class="text-xs text-slate-500">Price</p><p id="quotePrice" class="font-bold text-lg text-emerald-400"></p></div>
+                <div><p class="text-xs text-slate-500">Change</p><p id="quoteChange" class="font-bold text-lg"></p></div>
+                <div><p class="text-xs text-slate-500">Volume</p><p id="quoteVolume" class="font-bold text-lg"></p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock Chart -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-chart-line text-emerald-400 text-xl"></i>
+              <h2 class="font-semibold text-xl">Stock Performance</h2>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="loadStockChart('daily')" class="px-4 py-2 rounded-xl text-sm bg-slate-100 hover:bg-slate-200">Daily</button>
+              <button onclick="loadStockChart('intraday')" class="px-4 py-2 rounded-xl text-sm bg-slate-100 hover:bg-slate-200">Intraday</button>
+            </div>
+          </div>
+          <div class="h-80">
+            <canvas id="stockChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Market News -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center gap-3 mb-6">
+            <i class="fa-solid fa-newspaper text-emerald-400 text-xl"></i>
+            <h2 class="font-semibold text-xl">Market News</h2>
+          </div>
+          <div id="marketNews" class="space-y-4">
+            <div class="animate-pulse space-y-4">
+              <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+              <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+              <div class="h-4 bg-slate-200 rounded w-2/3"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+
+  <div id="chatbotButton" class="fixed right-6 bottom-6 z-50 bg-emerald-400 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:bg-emerald-500">
+    <i class="fa-solid fa-comment-dollar fa-lg"></i>
+  </div>
+
+  <div id="chatbotPanel" class="hidden fixed right-6 bottom-24 z-50 flex h-[600px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+    <div class="flex items-center justify-between gap-3 bg-emerald-400 px-4 py-3 text-white">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-robot"></i>
+        <div>
+          <p class="font-semibold">Finance Bot</p>
+          <p class="text-xs opacity-80">Ask about investing, saving, taxes</p>
+        </div>
+      </div>
+      <button id="chatbotClose" class="text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="chatbotMessages" class="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4"></div>
+    <div class="border-t border-slate-200 bg-white p-4">
+      <div class="flex gap-2">
+        <input id="chatbotInput" type="text" placeholder="Type a finance question..." class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <button id="chatbotSend" class="rounded-2xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-500">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk Assessment Modal -->
+  <div id="riskModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-3xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-semibold">Risk Assessment Questionnaire</h3>
+        <button id="closeRiskModal" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <div class="space-y-6" id="riskQuestions">
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">1. What is your age?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="1" data-score="80">Under 30</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="1" data-score="60">30-50</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="1" data-score="40">50-65</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="1" data-score="20">Over 65</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">2. How long do you plan to invest?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="2" data-score="20">Less than 3 years</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="2" data-score="40">3-7 years</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="2" data-score="60">7-15 years</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="2" data-score="80">More than 15 years</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">3. What is your investment goal?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="3" data-score="20">Capital preservation</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="3" data-score="40">Income</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="3" data-score="60">Growth</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="3" data-score="80">Aggressive growth</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">4. How would you react to a 20% drop in your portfolio?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="4" data-score="20">Sell everything</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="4" data-score="40">Sell some</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="4" data-score="60">Hold</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="4" data-score="80">Buy more</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">5. What percentage of your income do you save?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="5" data-score="20">Less than 5%</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="5" data-score="40">5-10%</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="5" data-score="60">10-20%</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="5" data-score="80">More than 20%</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">6. Have you invested in stocks before?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="6" data-score="20">No</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="6" data-score="40">Yes, a little</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="6" data-score="60">Yes, moderately</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="6" data-score="80">Yes, extensively</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">7. What is your knowledge of investing?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="7" data-score="20">Beginner</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="7" data-score="40">Intermediate</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="7" data-score="60">Advanced</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="7" data-score="80">Expert</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">8. How comfortable are you with volatility?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="8" data-score="20">Not comfortable</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="8" data-score="40">Somewhat</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="8" data-score="60">Comfortable</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="8" data-score="80">Very comfortable</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">9. What is your net worth excluding home?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="9" data-score="20">Less than 1 lakh</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="9" data-score="40">1-5 lakh</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="9" data-score="60">5-20 lakh</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="9" data-score="80">More than 20 lakh</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">10. How much debt do you have?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="10" data-score="20">High debt</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="10" data-score="40">Moderate</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="10" data-score="60">Low</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="10" data-score="80">No debt</div>
+          </div>
+        </div>
+        <div class="border-b border-slate-200 pb-4">
+          <p class="font-medium mb-3">11. What is your emergency fund?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="11" data-score="20">Less than 3 months</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="11" data-score="40">3-6 months</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="11" data-score="60">6-12 months</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="11" data-score="80">More than 12 months</div>
+          </div>
+        </div>
+        <div class="pb-4">
+          <p class="font-medium mb-3">12. How do you feel about risk?</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="12" data-score="20">Risk averse</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="12" data-score="40">Neutral</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="12" data-score="60">Risk tolerant</div>
+            <div class="risk-option border border-slate-200 rounded-2xl p-3 cursor-pointer hover:border-emerald-300" data-question="12" data-score="80">Risk seeking</div>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-between mt-6">
+        <button id="resetRiskAssessment" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-2xl">Reset</button>
+        <button id="saveRiskAssessment" class="bg-emerald-400 text-white px-4 py-2 rounded-2xl">Save Assessment</button>
+      </div>
+    </div>
+  </div>
+
+
+  
+  <script src="index.js"></script>
+</body>
+</html>

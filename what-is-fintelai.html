@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What is FintelAI? - AI-Powered Financial Advisor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    #chatbotButton { transition: transform 0.2s ease; }
+    #chatbotButton:hover { transform: translateY(-3px); }
+    .chatbot-bubble { display: inline-block; max-width: 100%; padding: 12px 14px; border-radius: 20px; line-height: 1.4; }
+    .chatbot-user { background: #dcfdf3; color: #164e2b; align-self: flex-end; }
+    .chatbot-bot { background: #f8fafc; color: #0f172a; align-self: flex-start; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+
+  <!-- Header -->
+  <header class="border-b border-slate-200 sticky top-0 z-50 bg-white">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-emerald-400 p-2 rounded-xl">
+          <i class="fa-solid fa-chart-line text-white text-2xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight">FintelAI</h1>
+      </div>
+      <nav class="hidden md:flex items-center gap-6">
+        <a href="index.html" class="text-slate-600 hover:text-slate-900">Home</a>
+        <a href="#" class="text-emerald-600 font-semibold">What is FintelAI?</a>
+        <a href="app.html?tab1" class="text-slate-600 hover:text-slate-900">Learn</a>
+      </nav>
+      <div id="authSection" class="flex items-center gap-4">
+        <button id="signInButton" class="rounded-2xl bg-emerald-400 text-white px-4 py-2 text-sm font-semibold hover:bg-emerald-500">Sign in with Google</button>
+        <button id="signOutButton" class="hidden rounded-2xl bg-slate-100 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-200">Sign Out</button>
+        <span id="userStatus" class="hidden text-[13px] text-slate-600"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-6 py-12">
+
+    <!-- Brief Summary -->
+    <section class="text-center mb-16">
+      <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6">What is FintelAI?</h1>
+      <p class="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+        FintelAI is your AI-powered financial advisor that helps you make smarter money decisions.
+        Whether you're just starting your financial journey or looking to optimize your investments,
+        FintelAI provides personalized recommendations, real-time market data, and expert guidance
+        through our intelligent chatbot and powerful calculators.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+          <div class="bg-emerald-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+            <i class="fa-solid fa-brain text-emerald-600 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">AI-Powered Insights</h3>
+          <p class="text-slate-600">Get personalized financial advice powered by advanced AI technology that understands your unique situation.</p>
+        </div>
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+          <div class="bg-emerald-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+            <i class="fa-solid fa-calculator text-emerald-600 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">Smart Calculators</h3>
+          <p class="text-slate-600">Use our SIP and future value calculators to plan your investments and see potential returns over time.</p>
+        </div>
+        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+          <div class="bg-emerald-100 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+            <i class="fa-solid fa-comments text-emerald-600 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">24/7 Chat Support</h3>
+          <p class="text-slate-600">Ask questions anytime with our intelligent chatbot that provides instant answers to your financial queries.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIP/Future Value Calculator -->
+    <section class="mb-16">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">SIP & Future Value Calculator</h2>
+        <p class="text-slate-600 max-w-2xl mx-auto">Plan your investments with our powerful calculator. See how systematic investment plans can grow your wealth over time.</p>
+      </div>
+
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Monthly SIP (₹)</label>
+            <input id="calcMonthly" type="number" value="5000" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Expected Return (%)</label>
+            <input id="calcRate" type="number" value="12" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Years</label>
+            <input id="calcYears" type="number" value="10" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+        </div>
+        <div class="h-80 mb-8">
+          <canvas id="growthLineChart"></canvas>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-slate-50 p-5 rounded-2xl">
+            <p class="text-sm font-semibold text-slate-600">Total Invested</p>
+            <p id="totalInvested" class="text-2xl font-bold text-slate-800">₹6,00,000</p>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-2xl">
+            <p class="text-sm font-semibold text-slate-600">Est. Returns</p>
+            <p id="estReturns" class="text-2xl font-bold text-emerald-400">₹4,85,000</p>
+          </div>
+          <div class="bg-emerald-400 text-white p-5 rounded-2xl">
+            <p class="text-sm font-semibold text-emerald-50">Final Value</p>
+            <p id="finalValue" class="text-2xl font-bold">₹10,85,000</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chatbot Section -->
+    <section class="text-center">
+      <h2 class="text-3xl font-bold text-slate-900 mb-4">Try Our AI Chatbot</h2>
+      <p class="text-slate-600 max-w-2xl mx-auto mb-8">Have questions about personal finance? Ask our AI-powered chatbot for instant advice and guidance.</p>
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 max-w-2xl mx-auto">
+        <div id="chatbotMessages" class="h-96 overflow-y-auto bg-slate-50 rounded-2xl p-4 mb-4 space-y-3">
+          <div class="chatbot-bubble chatbot-bot">Hello! I'm your AI financial advisor. Ask me anything about personal finance, investments, or saving strategies!</div>
+        </div>
+        <div class="flex gap-3">
+          <input id="chatbotInput" type="text" placeholder="Ask a finance question..." class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <button id="chatbotSend" class="bg-emerald-400 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-emerald-500">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Chatbot Floating Button (for mobile/small screens) -->
+  <div id="chatbotButton" class="fixed right-6 bottom-6 z-50 bg-emerald-400 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center cursor-pointer hover:bg-emerald-500 md:hidden">
+    <i class="fa-solid fa-comments"></i>
+  </div>
+
+  <!-- Chatbot Panel (for mobile/small screens) -->
+  <div id="chatbotPanel" class="hidden fixed right-6 bottom-24 z-50 flex h-[600px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl md:hidden">
+    <div class="bg-emerald-400 text-white p-4 flex items-center justify-between">
+      <h3 class="font-semibold">AI Financial Advisor</h3>
+      <button id="chatbotClose" class="text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="chatbotMessagesMobile" class="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4"></div>
+    <div class="p-4 border-t border-slate-200">
+      <div class="flex gap-3">
+        <input id="chatbotInputMobile" type="text" placeholder="Type a finance question..." class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <button id="chatbotSendMobile" class="bg-emerald-400 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-emerald-500">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="index.js"></script>
+  <script>
+    // Define all chatbot functions first
+    async function sendChatbotMessage() {
+      const input = document.getElementById('chatbotInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addChatbotMessage(text, 'user');
+      input.value = '';
+
+      try {
+        const response = await fetchWithRetry('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        const data = await response.json();
+        addChatbotMessage(data.reply || 'Unable to get response', 'bot');
+      } catch (error) {
+        console.error('Chatbot error:', error);
+        addChatbotMessage('The AI service is temporarily unavailable. Please try again in a moment.', 'bot');
+      }
+    }
+
+    async function sendChatbotMessageMobile() {
+      const input = document.getElementById('chatbotInputMobile');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addChatbotMessageMobile(text, 'user');
+      input.value = '';
+
+      try {
+        const response = await fetchWithRetry('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        const data = await response.json();
+        addChatbotMessageMobile(data.reply || 'Unable to get response', 'bot');
+      } catch (error) {
+        console.error('Chatbot error:', error);
+        addChatbotMessageMobile('The AI service is temporarily unavailable. Please try again in a moment.', 'bot');
+      }
+    }
+
+    // Retry logic with exponential backoff
+    async function fetchWithRetry(url, options, maxRetries = 3) {
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          const response = await fetch(url, options);
+          // Retry on 503 (Service Unavailable) or 429 (Too Many Requests)
+          if (response.status === 503 || response.status === 429) {
+            const delay = Math.pow(2, i) * 1000; // Exponential backoff: 1s, 2s, 4s
+            console.log(`API unavailable, retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+          return response;
+        } catch (error) {
+          if (i === maxRetries - 1) throw error;
+          const delay = Math.pow(2, i) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+
+    function addChatbotMessage(text, sender) {
+      const messages = document.getElementById('chatbotMessages');
+      if (!messages) return;
+      const bubble = document.createElement('div');
+      bubble.className = `chatbot-bubble ${sender === 'user' ? 'chatbot-user ml-auto' : 'chatbot-bot'}`;
+      bubble.textContent = text;
+      messages.appendChild(bubble);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function addChatbotMessageMobile(text, sender) {
+      const messages = document.getElementById('chatbotMessagesMobile');
+      if (!messages) return;
+      const bubble = document.createElement('div');
+      bubble.className = `chatbot-bubble ${sender === 'user' ? 'chatbot-user ml-auto' : 'chatbot-bot'}`;
+      bubble.textContent = text;
+      messages.appendChild(bubble);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function toggleChatbotPanel(show) {
+      const panel = document.getElementById('chatbotPanel');
+      if (panel) {
+        if (show) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      }
+    }
+
+    // Initialize Firebase and setup
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Firebase Auth only
+      initializeFirebase();
+      const auth = firebase.auth();
+      const signInButton = document.getElementById('signInButton');
+      const signOutButton = document.getElementById('signOutButton');
+      
+      if (signInButton) {
+        signInButton.addEventListener('click', signInWithGoogle);
+      }
+      
+      if (signOutButton) {
+        signOutButton.addEventListener('click', signOutUser);
+      }
+
+      auth.onAuthStateChanged(user => {
+        updateAuthUI(user);
+      });
+
+      // Calculator functionality
+      function updateCalculator() {
+        const monthly = parseFloat(document.getElementById("calcMonthly").value) || 5000;
+        const rate = parseFloat(document.getElementById("calcRate").value) || 12;
+        const years = parseFloat(document.getElementById("calcYears").value) || 10;
+
+        const futureValue = Math.round(calculateFutureValue(monthly, rate, years));
+        const invested = monthly * 12 * years;
+
+        document.getElementById("totalInvested").textContent = `₹${invested.toLocaleString()}`;
+        document.getElementById("estReturns").textContent = `₹${(futureValue - invested).toLocaleString()}`;
+        document.getElementById("finalValue").textContent = `₹${futureValue.toLocaleString()}`;
+
+        const labels = [], values = [], investedData = [];
+        for (let i = 0; i <= years; i++) {
+          labels.push(`Yr ${i}`);
+          values.push(Math.round(calculateFutureValue(monthly, rate, i)));
+          investedData.push(monthly * 12 * i);
+        }
+
+        if (window.growthChart) window.growthChart.destroy();
+        window.growthChart = new Chart(document.getElementById("growthLineChart"), {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              { label: "Total Value", data: values, borderColor: "#4ADE80", tension: 0.4, borderWidth: 4 },
+              { label: "Invested", data: investedData, borderColor: "#94a3b8", borderDash: [5, 5], borderWidth: 2 }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } } }
+        });
+      }
+
+      // Attach calculator event listeners
+      const calcMonthly = document.getElementById('calcMonthly');
+      const calcRate = document.getElementById('calcRate');
+      const calcYears = document.getElementById('calcYears');
+      
+      if (calcMonthly) calcMonthly.addEventListener('input', updateCalculator);
+      if (calcRate) calcRate.addEventListener('input', updateCalculator);
+      if (calcYears) calcYears.addEventListener('input', updateCalculator);
+
+      // Initialize calculator
+      updateCalculator();
+
+      // Attach chatbot event listeners
+      const chatbotSend = document.getElementById('chatbotSend');
+      const chatbotInput = document.getElementById('chatbotInput');
+      const chatbotSendMobile = document.getElementById('chatbotSendMobile');
+      const chatbotInputMobile = document.getElementById('chatbotInputMobile');
+      const chatbotButton = document.getElementById('chatbotButton');
+      const chatbotClose = document.getElementById('chatbotClose');
+
+      if (chatbotSend) chatbotSend.addEventListener('click', sendChatbotMessage);
+      if (chatbotInput) chatbotInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendChatbotMessage();
+      });
+
+      if (chatbotSendMobile) chatbotSendMobile.addEventListener('click', sendChatbotMessageMobile);
+      if (chatbotInputMobile) chatbotInputMobile.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendChatbotMessageMobile();
+      });
+
+      if (chatbotButton) chatbotButton.addEventListener('click', () => toggleChatbotPanel(true));
+      if (chatbotClose) chatbotClose.addEventListener('click', () => toggleChatbotPanel(false));
+    });
+  </script>
+
+</body>
+</html>

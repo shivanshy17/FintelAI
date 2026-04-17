@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - FintelAI</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Inter", Arial, sans-serif;
+      background: linear-gradient(180deg, #ffffff 0%, #f1fff3 60%);
+      color: #063a2d;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 50px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #eafff3; /* light green header */
+      border-bottom: 1px solid rgba(6,58,45,0.08);
+      box-shadow: 0 2px 12px rgba(6,58,45,0.06);
+    }
+
+    nav .logo {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: 1px solid rgba(6,58,45,0.12);
+      border-radius: 8px;
+      background: #ffffff;
+      color: #063a2d;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 2px 6px rgba(6,58,45,0.06);
+    }
+
+    .btn:hover {
+      background: linear-gradient(90deg, #e6fff0, #d8ffea);
+      border-color: rgba(6,58,45,0.18);
+    }
+
+    /* Emphasize header button for contrast on the light header */
+    nav .btn {
+      background: #0f8f67;
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 2px 8px rgba(15,143,103,0.18);
+    }
+    nav .btn:hover {
+      background: #12a877;
+    }
+
+    .login-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-box {
+      background: rgba(255,255,255,0.95);
+      padding: 50px 40px;
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      transition: all 0.35s ease;
+      position: relative;
+      box-shadow: 0 8px 30px rgba(6,58,45,0.06);
+    }
+
+    .login-box h2 {
+      margin-bottom: 10px;
+    }
+
+    .login-box p {
+      color: #2b6b57;
+      margin-bottom: 18px;
+    }
+
+    .g_id_signin {
+      display: flex;
+      justify-content: center;
+    }
+
+    footer {
+      background: transparent;
+      padding: 20px 50px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      color: #2b6b57;
+      font-size: 0.9rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a {
+      color: #2b6b57;
+      text-decoration: none;
+      margin-right: 20px;
+    }
+
+    footer a:hover {
+      color: #075437;
+    }
+  </style>
+  <script>
+    // using explicit backend origin instead of window.location.origin
+    const API_BASE = 'https://urban-civic-9oxw.onrender.com';
+    let isProcessingSignIn = false;
+
+    // Decode JWT token
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        console.error('Failed to parse JWT:', e);
+        return null;
+      }
+    }
+
+    // Google Sign-In callback - connects to backend
+    async function handleCredentialResponse(response) {
+      console.log("Google ID Token received:", response.credential);
+
+      // Prevent double processing
+      if (isProcessingSignIn) {
+        console.log('Sign-in already in progress');
+        return;
+      }
+      isProcessingSignIn = true;
+
+      try {
+        const googleToken = response.credential;
+        const userData = parseJwt(googleToken);
+        
+        if (!userData) {
+          throw new Error("Failed to decode token.");
+        }
+
+        console.log("Decoded User Info:", userData);
+
+        const googleId = userData.sub;
+        const googleName = userData.name;
+        const googleEmail = userData.email;
+
+        console.log('Attempting authentication with backend (google-login)...');
+
+        // Single backend call that upserts user by email and returns JWT
+        const authResponse = await fetch(`${API_BASE}/google-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: googleName, email: googleEmail })
+        });
+
+        let data;
+        const contentType = authResponse.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          data = await authResponse.json();
+        } else {
+          data = { error: await authResponse.text() };
+        }
+
+        if (!authResponse.ok) {
+          throw new Error(data.error || data || 'Authentication failed');
+        }
+
+        if (data.access_token) {
+          // Store JWT and user info in localStorage
+          localStorage.setItem('jwt', data.access_token);
+          localStorage.setItem('uc_user', googleName);
+          localStorage.setItem('google_id', googleId);
+          localStorage.setItem('uc_email', googleEmail);
+          
+          // Extract role from JWT
+          try {
+            const parts = data.access_token.split('.');
+            if (parts.length === 3) {
+              const payload = JSON.parse(atob(parts[1]));
+              localStorage.setItem('uc_role', payload.role || 'user');
+            }
+          } catch (e) {
+            localStorage.setItem('uc_role', 'user');
+          }
+          
+          // Persist backend base URL so other pages use the correct API origin
+          localStorage.setItem('api_base', 'https://urban-civic-9oxw.onrender.com');
+          
+          console.log('Authentication successful!');
+          console.log('JWT stored, redirecting to index.html...');
+          
+          // Redirect immediately to home; use replace to avoid back-navigation to login
+          window.location.replace("index.html");
+        } else {
+          throw new Error('No access token received from backend');
+        }
+      } catch (error) {
+        console.error('Sign-in error:', error);
+        alert('Login failed: ' + error.message);
+        isProcessingSignIn = false;
+      }
+    }
+
+    // Initialize Google Sign-In SDK
+    window.addEventListener('load', () => {
+      let googleLoadWaitCount = 0;
+      const checkGoogleLoaded = setInterval(() => {
+        googleLoadWaitCount++;
+        
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          clearInterval(checkGoogleLoaded);
+          
+          google.accounts.id.initialize({
+            client_id: '810650529533-7te3qfj1hmsbitccqal9559vpkce003e.apps.googleusercontent.com',
+            callback: handleCredentialResponse,
+            auto_select: false,
+            ux_mode: 'popup',
+            use_fedcm_for_prompt: false
+          });
+          console.log('Google Sign-In SDK initialized');
+        } else if (googleLoadWaitCount > 50) {
+          clearInterval(checkGoogleLoaded);
+          console.error('Google Sign-In SDK failed to load');
+        }
+      }, 100);
+    });
+  </script>
+
+</head>
+<body>
+
+<!-- Decorative background removed; using light green / white theme -->
+
+<nav>
+  <div class="logo">FintelAI</div>
+  <button class="btn">Register</button>
+</nav>
+
+<div class="login-container">
+  <div class="login-box">
+    <h2>Welcome Back</h2>
+    <p>Login to continue </p>
+
+    <div id="g_id_onload"
+      data-client_id="810650529533-7te3qfj1hmsbitccqal9559vpkce003e.apps.googleusercontent.com"
+      data-callback="handleCredentialResponse"
+      data-ux_mode="popup"
+      data-auto_prompt="false">
+    </div>
+
+    <div class="g_id_signin"
+      data-type="standard"
+      data-shape="rectangular"
+      data-theme="outline"
+      data-text="sign_in_with"
+      data-size="large">
+    </div>
+  </div>
+</div>
+
+<!-- Background animation removed; no additional scripts here -->
+
+</body>
+</html>

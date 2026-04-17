@@ -1,0 +1,314 @@
+* {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .wave-section {
+      position: relative;
+      height: 500px;                    
+      background: linear-gradient(135deg, #0f172a, #1e40af, #0ea5e9);
+      overflow: hidden;
+    }
+
+    .wave {
+      z-index: 1;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 250px;
+      animation: wave 28s linear infinite;
+    }
+
+    /* Different speeds and opacities for depth */
+    .wave:nth-child(1) {
+      animation-duration: 22s;
+      opacity: 0.95;
+    }
+    
+    .wave:nth-child(2) {
+      animation-duration: 28s;
+      opacity: 0.75;
+    }
+    
+    .wave:nth-child(3) {
+      animation-duration: 35s;
+      opacity: 0.55;
+    }
+
+    @keyframes wave {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      padding: 180px 20px 100px;
+      text-align: center;
+      color: white;
+    }
+
+    .content h1 {
+      font-size: 3.5rem;
+      margin-bottom: 15px;
+    }
+
+    .content p {
+      font-size: 1.3rem;
+      opacity: 0.9;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #4C6FFF 0%, #1E3A8A 100%);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 5%;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .logo span {
+      color: #4ADE80;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .login-btn {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .start-btn {
+      background: #4ADE80;
+      color: #1E3A8A;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 80px 5% 100px;
+      position: relative;
+    }
+
+    .hero-content {
+      max-width: 500px;
+    }
+    .hero-float-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 420px;           /* Adjust as needed */
+  margin: 0 auto;
+}
+
+
+
+@keyframes smoothFloat {
+  0%, 100% {
+    transform: translate(0px, 0px);
+  }
+  50% {
+    transform: translate(6px, -10px); /* small diagonal movement */
+  }
+}
+.floating-shadow {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  height: 25px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 70%);
+  border-radius: 50%;
+  filter: blur(8px);
+  opacity: 0.2;
+  animation: shadowFloat 3s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+
+
+/* Shadow Animation */
+@keyframes shadowFloat {
+  0%, 100% { 
+    transform: translateX(-50%) scale(1); 
+    opacity: 0.2; 
+  }
+  50% { 
+    transform: translateX(-50%) scale(0.85); 
+    opacity: 0.08; 
+  }
+}
+    .hero h1 {
+      font-size: 3.5rem;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 1.3rem;
+      margin-bottom: 30px;
+      opacity: 0.95;
+    }
+
+    .hero .subtext {
+      font-size: 1.1rem;
+      margin-bottom: 40px;
+    }
+
+    .trial-btn {
+      background: #4ADE80;
+      color: #1E3A8A;
+      padding: 16px 32px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .trial-btn:hover {
+      background: #22C55E;
+      transform: scale(1.05);
+    }
+
+    .no-card {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    /* Phone Mockup */
+.phone-container {
+  position: relative;
+  width: 40%;
+  height: 620px;
+}
+.hero-dollars {
+  position: absolute;
+  top: -20px;      /* adjust */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;    /* adjust size */
+  z-index: 2;
+  pointer-events: none;
+}
+
+.floating-hero {
+  width: 100%;
+  animation: smoothFloat 4s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+    .phone {
+      position: absolute;
+      width: 380px;
+      height: 620px;
+      background: linear-gradient(180deg, #3B82F6, #1E40AF);
+      border-radius: 50px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      border: 12px solid #111827;
+    }
+    .phone-screen {
+      height: 100%;
+      background: white;
+      color: #1F2937;
+      padding: 20px;
+      position: relative;
+    }
+
+    .phone-header {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .transaction-card {
+      background: #F3F4F6;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .priority-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .money {
+      position: absolute;
+      width: 50px;
+      animation: float 6s infinite ease-in-out;
+      filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2));
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-30px) rotate(10deg); }
+    }
+
+    /* Background waves */
+    .wave-bg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 400px;
+      background: linear-gradient(135deg, #22C55E, #86EFAC);
+      z-index: -1;
+      opacity: 0.9;
+    }
+
+    .wave-bg2 {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 400px;
+      background: #F8FAFC;
+      z-index: -2;
+    }

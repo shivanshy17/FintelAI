@@ -1,0 +1,24 @@
+/* Adjust card padding */
+#tab1 .bg-white.p-6 {
+    padding: 20px;
+}
+
+/* Add margin to Smart Insights */
+.bg-emerald-800.text-white.rounded-3xl {
+    margin-top: 32px;
+}
+
+/* Header styling */
+.header {
+    background: linear-gradient(135deg, #4C6FFF 0%, #1E3A8A 100%);
+    color: white;
+}
+
+.header h1 {
+    color: white;
+}
+
+/* General Body Styling overrides */
+body {
+    background: #f8fafc; /* match bg-slate-50 */
+}
