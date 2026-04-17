@@ -125,8 +125,8 @@
         signOutButton.classList.add("hidden");
         userStatus.classList.add("hidden");
         userStatus.textContent = "";
-        chatbotInput.disabled = true;
-        chatbotSend.disabled = true;
+        chatbotInput.disabled = false;
+        chatbotSend.disabled = false;
       }
     }
 
